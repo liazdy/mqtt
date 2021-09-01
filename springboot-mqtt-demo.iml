@@ -93,5 +93,6 @@
     <orderEntry type="library" name="Maven: org.springframework.integration:spring-integration-stream:5.5.1" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.integration:spring-integration-mqtt:5.5.1" level="project" />
     <orderEntry type="library" name="Maven: org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5" level="project" />
+    <orderEntry type="library" name="Maven: com.alibaba:fastjson:1.2.75" level="project" />
   </component>
 </module>
