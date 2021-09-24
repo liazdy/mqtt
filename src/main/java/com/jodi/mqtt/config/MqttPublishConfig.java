@@ -26,8 +26,8 @@ public class MqttPublishConfig {
      *
      * @return
      */
-    @Bean
-    public MessageChannel mqttPublishChannel() {
+    @Bean(value = "publishChannel")
+    public MessageChannel publishChannel() {
         return new DirectChannel();
     }
 

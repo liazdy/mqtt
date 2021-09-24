@@ -39,13 +39,13 @@ public class MqttSubscribeConfig {
      *
      * @return
      */
-    @Bean
+    @Bean(value = "mqttSubscribeChannel")
     public MessageChannel mqttSubscribeChannel() {
         return new DirectChannel();
     }
 
     /**
-     * 指定订阅的主题,理解为消息的生产者
+     * 使用客户端从订阅消息通道获取消息，配置qos等信息
      * @param mqttSubscribeChannel 订阅消息通道
      * @param factory mqtt客户端
      * @return

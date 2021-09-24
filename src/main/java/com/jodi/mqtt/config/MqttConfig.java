@@ -32,7 +32,7 @@ public class MqttConfig {
      * 创建Mqtt客户端
      * @return
      */
-    @Bean
+    @Bean(value = "factory")
     public MqttPahoClientFactory factory(){
         DefaultMqttPahoClientFactory factory = new DefaultMqttPahoClientFactory();
         MqttConnectOptions options = new MqttConnectOptions();
