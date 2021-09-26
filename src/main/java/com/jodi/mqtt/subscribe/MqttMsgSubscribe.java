@@ -24,8 +24,9 @@ public class MqttMsgSubscribe implements MessageHandler {
 
     @Override
     public void handleMessage(Message<?> message) throws MessagingException {
+        String id = String.valueOf(message.getHeaders().get(MqttHeaders.ID));
         String topic = String.valueOf(message.getHeaders().get(MqttHeaders.RECEIVED_TOPIC));
         String payload = String.valueOf(message.getPayload());
-        logger.info("订阅主题-->{},收到消息-->{}", topic, payload);
+        logger.info("Mqtt服务器ID-->{},订阅主题-->{},收到消息-->{}", id, topic, payload);
     }
 }
