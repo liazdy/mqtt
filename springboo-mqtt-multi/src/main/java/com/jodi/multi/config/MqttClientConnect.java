@@ -56,6 +56,8 @@ public class MqttClientConnect {
         options.setAutomaticReconnect(true);//默认：false
         options.setCleanSession(cleanSession);//默认：true
         //options.setKeepAliveInterval(20);//默认：60
+        // 设置遗愿消息
+        options.setWill("/lastWill", "device exception down".getBytes(), 1, false);
         return options;
     }
 
