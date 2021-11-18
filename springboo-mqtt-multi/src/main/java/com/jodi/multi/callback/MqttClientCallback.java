@@ -2,31 +2,48 @@ package com.jodi.multi.callback;
 
 import com.alibaba.fastjson.JSONObject;
 import com.jodi.multi.config.MqttClientConnect;
+import com.jodi.multi.entity.MqttInfo;
+import com.jodi.multi.service.MqttInfoService;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * MQTT回调函数
  */
 @Slf4j
-public class MqttClientCallback implements MqttCallback {
+@Component
+public class MqttClientCallback implements MqttCallback, MqttCallbackExtended {
 
     /**
      * 系统的mqtt客户端id
      */
     private String mqttClientId;
 
+    @Autowired
+    private MqttClientConnect mqttClientConnect;
+
+    private static MqttClientCallback callback;
+
+    @Autowired
+    private MqttInfoService mqttInfoService;
+
+    @PostConstruct
+    public void init() {
+        callback = this;
+    }
+
     public MqttClientCallback(String mqttClientId) {
         this.mqttClientId = mqttClientId;
     }
 
-    @Autowired
-    private MqttClientConnect mqttClientConnect;
+    public MqttClientCallback() {
+
+    }
 
     /**
      * MQTT 断开连接会执行此方法
@@ -55,12 +72,50 @@ public class MqttClientCallback implements MqttCallback {
             log.info("收到保留消息：{}，消息质量：{}，消息主题：{}", message.getPayload(), message.getQos(), topic);
         }
         ConcurrentHashMap<String, MqttClientConnect> mqttClients = MqttClientConnect.mqttClients;
-        JSONObject object = JSONObject.parseObject(message.toString());
+        String payload = message.toString();
+        // 方法一：解析JSON异常捕获防止断开连接
+        JSONObject object = null;
+        try {
+            object = JSONObject.parseObject(payload);
+        } catch (Exception e) {
+//            e.printStackTrace();
+            // 解析JSON消息异常打印日志并返回
+            log.error("解析JSON异常:" + e.getMessage() + ",message内容：" + payload);
+            return;
+        }
+        // 返回消息
         String direct = (String) object.get("direct");
         if ("0".equals(direct)) {
             // 从哪个clientId订阅的消息，就往哪个client响应消息
             MqttClientConnect mqttClientConnect = mqttClients.get(mqttClientId);
             mqttClientConnect.pub("/jodi/test", "{\"code\":\"200\"}");
         }
+    }
+
+    /**
+     * 连接成功(首次连接、断开连接都会执行该方法)
+     *
+     * @param b
+     * @param s
+     */
+    @Override
+    public void connectComplete(boolean b, String s) {
+        ConcurrentHashMap<String, MqttClientConnect> mqttClients = MqttClientConnect.mqttClients;
+        if (mqttClients.size() == 0) {
+            // 首次连接
+            log.info("连接成功，clientId-->" + mqttClientId);
+            return;
+        }
+        // 方法二：异常断开后重连，需要重新订阅主题(因为异常断开重连后不会订阅原来主题)
+        MqttClientConnect mqttConnect = mqttClients.get(mqttClientId);
+        MqttInfo mqtt = callback.mqttInfoService.findById(mqttClientId);
+        String topic = mqtt.getTopic();
+        try {
+            mqttConnect.sub(topic, 0);
+        } catch (MqttException e) {
+            e.printStackTrace();
+            log.error("重新连接后订阅异常");
+        }
+        log.info("重新连接后，订阅成功，topic-->" + topic);
     }
 }

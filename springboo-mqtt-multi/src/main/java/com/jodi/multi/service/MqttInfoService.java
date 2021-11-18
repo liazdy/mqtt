@@ -12,4 +12,6 @@ public interface MqttInfoService {
     int insert(MqttInfo mqttInfo) throws MqttException;
 
     int remove(String id) throws MqttException;
+
+    MqttInfo findById(String id);
 }

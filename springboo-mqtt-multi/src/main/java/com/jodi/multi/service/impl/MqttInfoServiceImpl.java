@@ -87,4 +87,15 @@ public class MqttInfoServiceImpl implements MqttInfoService {
         log.info("断开连接成功,id--->" + id);
         return 1;
     }
+
+    /**
+     * 根据id查询
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public MqttInfo findById(String id) {
+        return mqttInfoMapper.selectById(id);
+    }
 }
