@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.concurrent.ConcurrentHashMap;
@@ -101,13 +102,13 @@ public class MqttClientCallback implements MqttCallback, MqttCallbackExtended {
     @Override
     public void connectComplete(boolean b, String s) {
         ConcurrentHashMap<String, MqttClientConnect> mqttClients = MqttClientConnect.mqttClients;
-        if (mqttClients.size() == 0) {
+        MqttClientConnect mqttConnect = mqttClients.get(mqttClientId);
+        if (ObjectUtils.isEmpty(mqttConnect)) {
             // 首次连接
             log.info("连接成功，clientId-->" + mqttClientId);
             return;
         }
         // 方法二：异常断开后重连，需要重新订阅主题(因为异常断开重连后不会订阅原来主题)
-        MqttClientConnect mqttConnect = mqttClients.get(mqttClientId);
         MqttInfo mqtt = callback.mqttInfoService.findById(mqttClientId);
         String topic = mqtt.getTopic();
         try {
