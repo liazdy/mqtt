@@ -17,16 +17,23 @@ public class UserController {
 
         //User user = new User();
         //user.setUsername(username);
-        user.setId(1);
-        user.setRole(1);
-        user.setAvatar("https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif");
+        if (user == null) {
+            return Result.error().msg("请填写用户名密码");
+        }
+
+        if ("admin".equalsIgnoreCase(user.getUsername()) && "shi666ge".equals(user.getPassword())) {
+            user.setId(1);
+            user.setRole(1);
+            user.setAvatar("https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif");
 
 
-        ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object> userMap = mapper.convertValue(user, Map.class);
-        String token = JWTUtil.createTokenWithUserInfo(userMap);
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> userMap = mapper.convertValue(user, Map.class);
+            String token = JWTUtil.createTokenWithUserInfo(userMap);
 
-        return Result.success().data("token", token);
+            return Result.success().data("token", token);
+        }
+        return Result.error().msg("用户名密码错误");
 
     }
 
