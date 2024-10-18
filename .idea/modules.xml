@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/springboo-mqtt-multi/springboo-mqtt-multi.iml" filepath="$PROJECT_DIR$/springboo-mqtt-multi/springboo-mqtt-multi.iml" />
       <module fileurl="file://$PROJECT_DIR$/springboot-mqtt-demo.iml" filepath="$PROJECT_DIR$/springboot-mqtt-demo.iml" />
     </modules>
   </component>

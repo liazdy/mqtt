@@ -12,8 +12,6 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="springboo-mqtt-multi" target="1.8" />
-      <module name="springboot-mqtt-demo" target="1.8" />
       <module name="wrapper" target="1.5" />
     </bytecodeTargetLevel>
   </component>
