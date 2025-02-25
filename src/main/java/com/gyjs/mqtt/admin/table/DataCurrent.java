@@ -43,17 +43,23 @@ public class DataCurrent {
     @Column(name = "cp")
     private Float cp;
 
-    @Column(name = "td1")
-    private Float td1;
-
     @Column(name = "cs")
     private Float cs;
+
+    @Column(name = "ca")
+    private Float ca;
+
+    @Column(name = "td1")
+    private Float td1;
 
     @Column(name = "td2")
     private Float td2;
 
-    @Column(name = "ca")
-    private Float ca;
+    @Column(name = "td3")
+    private Float td3;
+
+    @Column(name = "td4")
+    private Float td4;
 
     @Column(name = "qos")
     private Short qos;

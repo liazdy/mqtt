@@ -21,12 +21,6 @@ public class DataHistory {
     @Column(name = "client_id", nullable = false)
     private String clientId;
 
-    @Column(name = "nickname")
-    private String nickname;
-
-    @Column(name = "remark")
-    private String remark;
-
     @Column(name = "step")
     private Integer step;
 
@@ -53,6 +47,12 @@ public class DataHistory {
 
     @Column(name = "td2")
     private Float td2;
+
+    @Column(name = "td3")
+    private Float td3;
+
+    @Column(name = "td4")
+    private Float td4;
 
     @Column(name = "qos")
     private Short qos;

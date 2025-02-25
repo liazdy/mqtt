@@ -19,6 +19,10 @@ public class DataMqtt {
 
     private Float a2;
 
+    private Float a3;
+
+    private Float a4;
+
     private Float cp;
 
     private Float cs;
