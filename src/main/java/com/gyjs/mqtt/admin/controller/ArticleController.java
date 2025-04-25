@@ -1,5 +1,7 @@
 package com.gyjs.mqtt.admin.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gyjs.mqtt.admin.Utils.JWTUtil;
 import com.gyjs.mqtt.admin.bean.ListQuery;
 import com.gyjs.mqtt.admin.bean.Result;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +34,9 @@ public class ArticleController {
     private DataHistoryService dataHistoryService;
     @Autowired
     private MqttMsgPublisher publisher;
-    
+    @Autowired
+    private ObjectMapper objectMapper;
+
     private Logger logger = LoggerFactory.getLogger(ArticleController.class);
 
     @GetMapping("/list")
@@ -112,12 +117,20 @@ public class ArticleController {
 
     @PostMapping("/publish/rate")
     public Result publishRate(@RequestBody DataCurrent dataCurrent) {
+        if (dataCurrent.getImei() != null && !dataCurrent.getImei().isEmpty()) {
+            publishV2("set_rate", dataCurrent.getRate(), dataCurrent.getImei());
+            return Result.success();
+        }
         publish(dataCurrent.getClientId() + "_rate", dataCurrent.getRate().toString());
         return Result.success();
     }
 
     @PostMapping("/publish/step")
     public Result publishStep(@RequestBody DataCurrent dataCurrent) {
+        if (dataCurrent.getImei() != null && !dataCurrent.getImei().isEmpty()) {
+            publishV2("set_step", dataCurrent.getStep(), dataCurrent.getImei());
+            return Result.success();
+        }
         publish(dataCurrent.getClientId() + "_step", dataCurrent.getStep().toString());
 
         return Result.success();
@@ -126,19 +139,24 @@ public class ArticleController {
 
     @PostMapping("/publish/qos")
     public Result publishQos(@RequestBody DataCurrent dataCurrent) {
+        if (dataCurrent.getImei() != null && !dataCurrent.getImei().isEmpty()) {
+            publishV2("set_qos", dataCurrent.getQos(), dataCurrent.getImei());
+            return Result.success();
+        }
         publish(dataCurrent.getClientId() + "_qos", dataCurrent.getQos().toString());
 
         return Result.success();
     }
 
     @PostMapping("/publish/qos_all")
+    @Deprecated
     public Result publishQosAll(@RequestBody DataCurrent dataCurrent) {
-
-        List<DataCurrent> all = dataCurrentService.findAll();
-
-        all.parallelStream().forEach(dataC -> {
-            publish(dataC.getClientId() + "_qos", dataCurrent.getQos().toString());
-        });
+        //这个不再支持 不再更新
+//        List<DataCurrent> all = dataCurrentService.findAll();
+//
+//        all.parallelStream().forEach(dataC -> {
+//            publish(dataC.getClientId() + "_qos", dataCurrent.getQos().toString());
+//        });
 
         return Result.success();
     }
@@ -174,8 +192,27 @@ public class ArticleController {
         return Sort.by(Sort.Direction.ASC, "id");
     }
 
-    private void publish(String topic, String payload) {
+    private void publish(String topic, Object payload) {
         publisher.publishMsgWithQos2(topic, payload);
         logger.info("推送主题-->{},推送消息-->{}", topic, payload);
+    }
+
+    private void publishV2(String cmd, Object value, String imei) {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("cmd", cmd);
+        if (value != null) {
+            payload.put("value", value);
+        }
+
+
+        String topic = "/v2/sub/" + imei;
+        String jsonPayload = null;
+        try {
+            jsonPayload = objectMapper.writeValueAsString(payload);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        publisher.publishMsgWithQos2(topic, jsonPayload);
+        logger.info("推送主题-->{},推送消息-->{}", topic, jsonPayload);
     }
 }

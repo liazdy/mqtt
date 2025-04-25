@@ -28,6 +28,12 @@ public class DataCurrent {
     @Column(name = "remark")
     private String remark;
 
+    @Column(name = "imei")
+    private String imei;
+
+    @Column(name = "csq")
+    private String csq;
+
     @Column(name = "step")
     private Integer step;
 
@@ -73,4 +79,5 @@ public class DataCurrent {
     @Column(name = "create_time")
     private Long createTime;
 
+   
 }

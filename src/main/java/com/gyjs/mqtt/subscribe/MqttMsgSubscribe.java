@@ -6,7 +6,6 @@ import com.gyjs.mqtt.admin.repository.DataCurrentService;
 import com.gyjs.mqtt.admin.repository.DataHistoryService;
 import com.gyjs.mqtt.admin.table.DataCurrent;
 import com.gyjs.mqtt.admin.table.DataHistory;
-import com.gyjs.mqtt.admin.table.DataMqtt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,37 +66,57 @@ public class MqttMsgSubscribe implements MessageHandler {
 
         String id = String.valueOf(message.getHeaders().get(MqttHeaders.ID));
         int qos = Integer.valueOf(String.valueOf(message.getHeaders().get(MqttHeaders.RECEIVED_QOS)), 10);
-        String payload = String.valueOf(message.getPayload());
-        logger.info("Mqtt服务器ID-->{},订阅主题-->{},收到消息-->{}, qos -->{}", id, topic, payload, qos);
+        String[] payload = String.valueOf(message.getPayload()).split("###");
+        String mcuPayload = payload[0];
+        logger.info("Mqtt服务器ID-->{},订阅主题-->{},收到消息-->{}, qos -->{}", id, topic, message.getPayload(), qos);
         if (topic.equalsIgnoreCase("time")) return;
         if (!topic.split("_")[topic.split("_").length - 1].equals("info"))
             return;
 
 
         try {
-            DataMqtt dataMqtt = objectMapper.readValue(payload, DataMqtt.class);
+            DataCurrent dataMqtt = objectMapper.readValue(mcuPayload, DataCurrent.class);
             String clientId = dataMqtt.getClientId();
 
             DataCurrent dataCurrent = dataCurrentService.findByClientId(clientId);
             if (dataCurrent == null) {
-                dataCurrent = objectMapper.readValue(payload, DataCurrent.class);
+                dataCurrent = dataMqtt;
                 dataCurrent.setCreateTime(currentTime);
             } else {
                 merge(dataMqtt, dataCurrent);
+            }
+
+            String imei = "";
+            String csq = "";
+            if (topic.startsWith("/v2")) {
+                if (payload.length > 1) {
+                    imei = payload[1];
+                    dataCurrent.setImei(imei);
+                }
+                if (payload.length > 2) {
+                    csq = payload[2];
+                    dataCurrent.setCsq(csq);
+                }
             }
             dataCurrent.setUpdateTime(currentTime);
             dataCurrent.setQos((short) qos);
             dataCurrentService.save(dataCurrent);
 
-            DataHistory dataHistory = objectMapper.readValue(payload, DataHistory.class);
+            DataHistory dataHistory = objectMapper.readValue(mcuPayload, DataHistory.class);
+            if (topic.startsWith("/v2")) {
+                if (payload.length > 2) {
+                    csq = payload[2];
+                    dataHistory.setCsq(csq);
+                }
+            }
             dataHistory.setCreateTime(currentTime);
             dataHistory.setQos((short) qos);
             dataHistoryService.save(dataHistory);
 
         } catch (JsonProcessingException e) {
-            logger.error("json read error : {}", payload);
+            logger.error("json read error : {}", mcuPayload);
             //throw new RuntimeException(e);
         }
-        logger.info("Mqtt服务器ID-->{},订阅主题-->{},收到消息-->{}", id, topic, payload);
+        logger.info("done-->{},订阅主题-->{},收到消息-->{}", id, topic, message.getPayload());
     }
 }

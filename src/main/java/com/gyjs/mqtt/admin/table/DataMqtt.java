@@ -33,6 +33,11 @@ public class DataMqtt {
 
     private Float td2;
 
+    private Float td3;
+    
+    private Float td4;
+
+
     private Short qos;
 
     private Long timestamp;

@@ -21,6 +21,9 @@ public class DataHistory {
     @Column(name = "client_id", nullable = false)
     private String clientId;
 
+    @Column(name = "csq")
+    private String csq;
+
     @Column(name = "step")
     private Integer step;
 
