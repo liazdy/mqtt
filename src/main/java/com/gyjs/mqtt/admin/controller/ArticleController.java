@@ -212,7 +212,7 @@ public class ArticleController {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        publisher.publishMsgWithQos2(topic, jsonPayload);
+        publisher.publishMsgWithQos2(topic, jsonPayload + "\r\n");
         logger.info("推送主题-->{},推送消息-->{}", topic, jsonPayload);
     }
 }
