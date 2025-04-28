@@ -77,7 +77,7 @@ public class MqttMsgSubscribe implements MessageHandler {
         try {
             DataCurrent dataMqtt = objectMapper.readValue(mcuPayload, DataCurrent.class);
             String clientId = dataMqtt.getClientId();
-            if ("".equalsIgnoreCase(clientId) || clientId.isEmpty()) {
+            if ("".equalsIgnoreCase(clientId) || clientId == null) {
                 logger.info("no clientId found . return");
                 return;
             }
